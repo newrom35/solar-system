@@ -11,7 +11,7 @@ sphere.prototype = new worldObject;
 	}
 
 	sphere.prototype.initBuffers = function()
-	{	
+	{
 		//il manque le code des normales à ajouter!
 		vertices = [];
         textureCoords = [];
@@ -66,8 +66,8 @@ sphere.prototype = new worldObject;
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
 		vertexTextureCoordBuffer.itemSize = 2;
 		vertexTextureCoordBuffer.numItems = nbVertice;
-		
+
 		//il manque le code des normales à ajouter!
-		
+
 		return [vertexPositionBuffer, vertexTextureCoordBuffer, vertexIndexBuffer];
 	}

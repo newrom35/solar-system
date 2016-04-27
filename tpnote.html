@@ -293,15 +293,21 @@
 		//var newObject = new square(rootObject);
 		//objects.push(newObject);
 		//newObject.translate([0,2,0]);
-		
+
 
 		rootObject = new sphere(null);
 		objects.push(rootObject);
-		rootObject.translate([0,0,-1]);
+		rootObject.translate([0,0,-2]);
 
 		var terre = new sphere(rootObject);
-		objects.push(terre);
-		terre.translate(2,2,-1);
+    objects.push(terre);
+    terre.translate([3,0,0]);
+    terre.scale([0.5,0.5,0.5]);
+
+    var moon = new sphere(terre);
+    objects.push(moon);
+    moon.translate([2,0,0]);
+    moon.scale([0.2,0.2,0.2]);
 
 		return rootObject;
 
