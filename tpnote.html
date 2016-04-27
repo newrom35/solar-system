@@ -1,5 +1,5 @@
 <html><head>
-<title>Apprendre WebGL — leçon 3</title>
+<title>TP notÃ©</title>
 <meta http-equiv="content-type" content="text/html; charset=windows-1252">
 
 <script type="text/javascript" src="libs/glMatrix-0.9.5.min.js"></script>
@@ -44,24 +44,24 @@
 	//GLOBALS
     var gl;
 	var shaderProgram;
-	
+
 	var mvMatrix = mat4.create();
     var mvMatrixStack = [];
     var pMatrix = mat4.create();
-	
+
 	//textures
 	var texture0;
-		
+
 	//interaction
 	var drawStyle;
-	
+
 	var userRotationMatrix = mat4.create();
   	mat4.identity(userRotationMatrix);
-	
+
 	//var rTri = 0;
     //var rSquare = 0;
 	var rSphere = 0;
-	
+
 	var lastTime = 0;
 	var mouseDown = false;
   	var lastMouseX = null;
@@ -71,7 +71,7 @@
   	//var toggleTriangle = true;
   	//var toggleSquare= true;
   	var toggleSphere= true;
-	
+
 	var camX = 0;
 	var camZ = 0;
 	var camHeight = 0;
@@ -79,15 +79,15 @@
 	//world
 	var objects = [];
 	var rootObject;
-	
+
 	//geometry
 	var pasLat = 3;
 	var pasLong = 6;
 	var tetaMax = 360;
 	var phiMax = 90;
 
-	
-	
+
+
 	//SHADERS
     function initGL(canvas)
 	{
@@ -177,7 +177,7 @@
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     }
-	
+
 	function mvPushMatrix()
 	{
         var copy = mat4.create();
@@ -199,8 +199,8 @@
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     }
-	
-	
+
+
 	//TEXTURES
 	function initTexture()
 	{
@@ -228,7 +228,7 @@
 
 
 	//INITGL
-	
+
     function degToRad(degrees)
 	{
         return degrees * Math.PI / 180;
@@ -251,12 +251,12 @@
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
         mat4.identity(mvMatrix);
-		
+
 		mat4.rotate(mvMatrix, -camHeight, [1, 0, 0]);
-		
+
 		mat4.translate(mvMatrix, [camX, 0.0, camZ]);
 		mat4.translate(mvMatrix, [0, 0.0, -10.0]);
-		
+
 		gl.activeTexture(gl.TEXTURE0);
 		gl.bindTexture(gl.TEXTURE_2D, texture0);
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
@@ -265,22 +265,22 @@
     }
 
 	function initWorldObjects()
-	{ 
-		var obj = 12; 
+	{
+		var obj = 12;
 
 		//rootObject = new triangle(null);
 		//rootObject.translate([1,-1,0.5]);
-		//objects.push(rootObject); 
+		//objects.push(rootObject);
 		/*
 		for (var i=0; i < obj; i++)
-		{ 
+		{
 			var newObject = new triangle(rootObject);
 			objects.push(newObject);
 			newObject.rotate(-i*Math.PI/12, [0,0,1])
 			newObject.translate([2,0,i/100])
 			newObject.scale([1-i/12,1-i/12,1-i/12])
 		}
-		
+
 		var newObject = new square(rootObject);
 		objects.push(newObject);
 		newObject.translate([0,2,0]);
@@ -288,11 +288,11 @@
 		rootObject = new sphere();
 		objects.push(rootObject);
 		rootObject.translate([2,2,0]);
-		
-		
+
+
 		return rootObject;
 	}
-	
+
     function animate()
 	{
         var timeNow = new Date().getTime();
@@ -337,7 +337,7 @@
 		drawStyle = gl.TRIANGLES;
         tick();
     }
-		
+
 	//interactions
   	function handleMouseDown(event) {
     	mouseDown = true;
@@ -405,12 +405,15 @@
 			case 34: //pageDown
 					camHeight-=degToRad(1);
 					break;
+      case 116: //f5
+          location.reload();
+          break;
 
 				default:
 
 		}
     }
-	
+
 
 	function drawCombo(list)
 	{
