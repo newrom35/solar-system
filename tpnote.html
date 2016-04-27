@@ -211,7 +211,7 @@
 		  handleLoadedTexture(texture0)
 		}
 
-    texture0.image.src = "./img/moon.gif"; // note : croos origin problem with chrome outside webserver
+    //texture0.image.src = "./img/moon.gif"; // note : croos origin problem with chrome outside webserver
 	texture0.image.src = "./img/earth.jpg"; // note : croos origin problem with chrome outside webserver
   }
 
@@ -268,9 +268,9 @@
 	{ 
 		var obj = 12; 
 
-		rootObject = new triangle(null);
-		rootObject.translate([0,-1,0.5]);
-		objects.push(rootObject); 
+		//rootObject = new triangle(null);
+		//rootObject.translate([1,-1,0.5]);
+		//objects.push(rootObject); 
 		/*
 		for (var i=0; i < obj; i++)
 		{ 
@@ -285,9 +285,9 @@
 		objects.push(newObject);
 		newObject.translate([0,2,0]);
 		*/
-		newObject = new sphere(rootObject);
-		objects.push(newObject);
-		newObject.translate([2,2,0]);
+		rootObject = new sphere();
+		objects.push(rootObject);
+		rootObject.translate([2,2,0]);
 		
 		
 		return rootObject;
@@ -464,11 +464,11 @@
 
 			<br />
 			Draw mode <select id="drawCombo" onChange="drawCombo(this)">
-				<option id="option1">POINTS</option>
+				<!--<option id="option1">POINTS</option>
 				<option id="option2">LINES</option>
 				<option id="option3">LINE_LOOP</option>
 				<option id="option4">LINE_STRIP</option>
-				<option selected="selected" id="option5">TRIANGLES</option>
+				<option selected="selected" id="option5">TRIANGLES</option>-->
 				<option id="option6">TRIANGLE_STRIP</option>
 				<option id="option7">TRIANGLE_FAN</option>
 			</select>
