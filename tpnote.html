@@ -50,8 +50,13 @@
     var pMatrix = mat4.create();
 
 	//textures
-	var texture0;
-	var texture1;
+	//var texture0;
+	//var texture1;
+  var textures = new Array();
+  var listeTexture = new Array();
+  listeTexture.push('./img/sun.jpg');
+  listeTexture.push('./img/venus.jpg');
+  listeTexture.push('./img/earth.jpg');
 
 	//interaction
 	var drawStyle;
@@ -205,34 +210,29 @@
 	//TEXTURES
 	function initTexture()
 	{
-		texture0 = gl.createTexture();
-		texture0.image = new Image();
-		texture0.image.onload = function()
-		{
-		  handleLoadedTexture(texture0)
-		}
-
-		texture1 = gl.createTexture();
-		texture1.image = new Image();
-		texture1.image.onload = function()
-		{
-		  handleLoadedTexture(texture0)
-		}
-
-    texture1.image.src = "./img/earth.jpg"; // note : croos origin problem with chrome outside webserver
-	texture0.image.src = "./img/sun.jpg"; // note : croos origin problem with chrome outside webserver
+    var indice = listeTexture.length;
+    for (var i=0; i < indice; i++) {
+      var texture = gl.createTexture();
+      texture.image = new Image();
+      texture.image.onload = function()
+      {
+        handleLoadedTexture(texture);
+      }
+      texture.image.src=listeTexture[i];
+      textures.push(texture);
+    }
   }
 
 	function handleLoadedTexture(texture)
 	{
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-		gl.bindTexture(gl.TEXTURE_2D, texture0);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-		gl.generateMipmap(gl.TEXTURE_2D);
-		gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
 	}
 
 
@@ -255,11 +255,11 @@
 
     function drawScene()
 	{
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-        mat4.identity(mvMatrix);
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    mat4.identity(mvMatrix);
 
 		mat4.rotate(mvMatrix, -camHeight, [1, 0, 0]);
 
@@ -267,7 +267,7 @@
 		mat4.translate(mvMatrix, [0, 0.0, -10.0]);
 
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, texture0);
+		gl.bindTexture(gl.TEXTURE_2D, textures[2]);
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
 
 		rootObject.draw();
@@ -275,41 +275,102 @@
 
 	function initWorldObjects()
 	{
-		//var obj = 12;
+		soleil = new sphere(null,null,0);
+		objects.push(soleil);
+		soleil.translate([0,0,-2]);
 
-		//rootObject = new triangle(null);
-		//rootObject.translate([1,-1,0.5]);
-		//objects.push(rootObject);
-		/*
-		for (var i=0; i < obj; i++)
-		{
-			var newObject = new triangle(rootObject);
-			objects.push(newObject);
-			newObject.rotate(-i*Math.PI/12, [0,0,1])
-			newObject.translate([2,0,i/100])
-			newObject.scale([1-i/12,1-i/12,1-i/12])
-		}*/
+    //Pour permettre la modification de la vitesse de revolution des planetes
+    //mercure
+    soleil_mercure = new sphere(soleil,null,100);
+    soleil_mercure.scale([0.99,0.99,0.99]);
+    //venus
+    soleil_venus = new sphere(soleil,null,40);
+    soleil_venus.scale([0.99,0.99,0.99]);
+    //terre
+		soleil_terre = new sphere(soleil,null,21);
+    soleil_terre.scale([0.99,0.99,0.99]);
+    //mars
+    soleil_mars = new sphere(soleil,null,19);
+    soleil_mars.scale([0.99,0.99,0.99]);
+    //jupiter
+    soleil_jupiter = new sphere(soleil,null,10);
+    soleil_jupiter.scale([0.99,0.99,0.99]);
+    //saturne
+    soleil_saturne = new sphere(soleil,null,7);
+    soleil_saturne.scale([0.99,0.99,0.99]);
+    //uranus
+    soleil_uranus = new sphere(soleil,null,6);
+    soleil_uranus.scale([0.99,0.99,0.99]);
+    //neptune
+    soleil_neptune = new sphere(soleil,null,15);
+    soleil_neptune.scale([0.99,0.99,0.99]);
+    soleil_neptune.rotate(0.05,[0,0,1]);
 
-		//var newObject = new square(rootObject);
-		//objects.push(newObject);
-		//newObject.translate([0,2,0]);
+    //Objet mercure
+    var mercure = new sphere(soleil_mercure, null, 250);
+    objects.push(mercure);
+    mercure.translate([3,0,0]);
+    mercure.scale([0.05,0.05,0.05]);
 
+    //Objet venus
+    var venus = new sphere(soleil_venus,null,150);
+    objects.push(venus);
+    venus.translate([5,0,0]);
+    venus.scale([0.15,0.15,0.15]);
 
-		rootObject = new sphere(null);
-		objects.push(rootObject);
-		rootObject.translate([0,0,-2]);
-
-		var terre = new sphere(rootObject);
+    //Objet terre
+		var terre = new sphere(soleil_terre,null,120);
     objects.push(terre);
-    terre.translate([3,0,0]);
-    terre.scale([0.5,0.5,0.5]);
+    terre.translate([7,0,0]);
+    terre.rotate(0.3,[0,0,1]);
+    terre.scale([0.17,0.17,0.17]);
 
-    var moon = new sphere(terre);
-    objects.push(moon);
-    moon.translate([2,0,0]);
-    moon.scale([0.2,0.2,0.2]);
+    //Pour permettre la modification de la vitesse de revolution de la lune
+    var terre_lune = new sphere(soleil_terre,null,60);
+    terre_lune.translate([7,0,0]);
+    terre_lune.scale([0.169,0.169,0.169]);
 
-		return rootObject;
+    //Objet lune
+    var lune = new sphere(terre_lune,null,0);
+    objects.push(lune);
+    lune.translate([2,0,0]);
+    lune.scale([0.2,0.2,0.2]);
+
+    //Objet mars
+    var mars = new sphere(soleil_mars,null,100);
+    objects.push(mars);
+    mars.translate([9,0,0]);
+    mars.scale([0.1,0.1,0.1]);
+
+    //Objet Jupiter
+    var jupiter = new sphere(soleil_jupiter, null,50);
+    objects.push(jupiter);
+    jupiter.translate([15,0,0]);
+    jupiter.scale([0.9,0.9,0.9]);
+
+    //Objet saturne
+    var saturne = new sphere(soleil_saturne,null,25);
+    objects.push(saturne);
+    saturne.translate([20,0,0]);
+    saturne.rotate(-0.5,[0,0,1]);
+    saturne.rotate(0.1,[1,0,0]);
+    saturne.scale([0.8,0.8,0.8]);
+
+    //Objet uranus
+    var uranus = new sphere(soleil_uranus,null,25);
+    objects.push(uranus);
+    uranus.translate([25,0,0]);
+    uranus.rotate(1,[0,0,1]);
+    uranus.rotate(-0.3,[1,0,0]);
+    uranus.scale([0.6,0.6,0.6]);
+
+    //Objet neptune
+    var neptune = new sphere(soleil_neptune,null,40);
+    objects.push(neptune);
+    neptune.translate([30,0,0]);
+    neptune.scale([0.5,0.5,0.5]);
+
+		return soleil;
 
 	}
 
@@ -342,17 +403,17 @@
 		//webGL
         initGL(canvas);
         initShaders()
+    		initTexture();
 		rootObject = initWorldObjects();
-		initTexture();
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
 
 		//interactions
 		canvas.onmousedown = handleMouseDown;
-	    document.onmouseup = handleMouseUp;
-	    document.onmousemove = handleMouseMove;
-	    canvas.onmousewheel = handleWheel;
+	  document.onmouseup = handleMouseUp;
+	  document.onmousemove = handleMouseMove;
+	  canvas.onmousewheel = handleWheel;
 		window.addEventListener("keydown", handleKeyDown, false);
 		drawStyle = gl.TRIANGLES;
         tick();
@@ -487,11 +548,11 @@
 
 			<br />
 			Draw mode <select id="drawCombo" onChange="drawCombo(this)">
-				<!--<option id="option1">POINTS</option>
+				<option id="option1">POINTS</option>
 				<option id="option2">LINES</option>
 				<option id="option3">LINE_LOOP</option>
 				<option id="option4">LINE_STRIP</option>
-				<option selected="selected" id="option5">TRIANGLES</option>-->
+				<option selected="selected" id="option5">TRIANGLES</option>
 				<option id="option6">TRIANGLE_STRIP</option>
 				<option id="option7">TRIANGLE_FAN</option>
 			</select>

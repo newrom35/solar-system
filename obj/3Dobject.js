@@ -1,6 +1,6 @@
 
 //INITWORLD
-function worldObject(parent)
+function worldObject(parent,texture,rotation)
 {
 	this.localTransformation = mat4.create();
 	this.children = [];
@@ -9,7 +9,22 @@ function worldObject(parent)
 	this.vertexIndexBuffer = null;
 	this.toggled = true;
 	// il faudra sans doute ajouter des choses ici pour gérer les nomales
-	this.texture = null;
+	if(typeof texture == 'undefined' || texture == null)
+	{
+		this.texture=null;
+	}
+	else
+	{
+		this.texture = texture;
+	}
+	if(typeof rotation == 'undefined' || rotation == null)
+	{
+		this.rotation = 360;
+	}
+	else
+	{
+		this.rotation = rotation
+	}
 	mat4.identity(this.localTransformation);
 	if(parent != null) parent.addChild(this);
 }
@@ -40,7 +55,7 @@ worldObject.prototype.draw = function()
 	{
 		if(this.texture != null)
 		{
-			gl.activeTexture(this.texture.getbind());
+			//gl.activeTexture(this.texture.getBind());
 			gl.bindTexture(gl.TEXTURE_2D, this.texture);
 			gl.uniform1i(shaderProgram.samplerUniform, this.texture.bindNumber);
 		}
@@ -55,7 +70,7 @@ worldObject.prototype.draw = function()
 		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, this.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 		// il faudra sans doute ajouter des choses ici pour gérer les nomales
-		
+
 		setMatrixUniforms();
 		if(this.vertexIndexBuffer == null)
 		{
@@ -83,5 +98,5 @@ worldObject.prototype.animate = function(elapsedTime)
 	{
 		this.children[i].animate(elapsedTime);
 	}
-	this.rotate(0.001*elapsedTime,[0,1,0]); // cette ligne est surement discutable comme animation par défaut!
+	this.rotate(0.01*elapsedTime*this.rotation/360,[0,1,0]); // cette ligne est surement discutable comme animation par défaut!
 }

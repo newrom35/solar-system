@@ -1,8 +1,8 @@
 sphere.prototype = new worldObject;
-	function sphere(parent)
+	function sphere(parent,texture,rotation)
 	{
 		this.base = worldObject;
-		this.base(parent);
+		this.base(parent,texture,rotation);
 		var buffers = this.initBuffers();
 		this.vertexPositionBuffer = buffers[0];
 		this.vertexTextureCoordBuffer = buffers[1];
