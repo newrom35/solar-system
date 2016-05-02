@@ -1,5 +1,5 @@
 <html><head>
-<title>TP noté</title>
+<title>TP not&eacute;</title>
 <meta http-equiv="content-type" content="text/html; charset=windows-1252">
 
 <script type="text/javascript" src="libs/glMatrix-0.9.5.min.js"></script>
@@ -55,8 +55,18 @@
   var textures = new Array();
   var listeTexture = new Array();
   listeTexture.push('./img/sun.jpg');
+  listeTexture.push('./img/mercure.jpg');
   listeTexture.push('./img/venus.jpg');
   listeTexture.push('./img/earth.jpg');
+  listeTexture.push('./img/mars.jpg');
+  listeTexture.push('./img/jupiter.jpg');
+  listeTexture.push('./img/saturn.png');
+  listeTexture.push('./img/uranus.jpg');
+  listeTexture.push('./img/neptune.jpg');
+  listeTexture.push('./img/moon.gif');
+  listeTexture.push('./img/stars.jpg');
+  listeTexture.push('./img/anneaux.jpg');
+  listeTexture.push('./img/asteroid.jpg');
 
 	//interaction
 	var drawStyle;
@@ -208,7 +218,24 @@
 
 
 	//TEXTURES
-	function initTexture()
+  function initTexture()
+  {
+    var indice = listeTexture.length;
+    for (var i=0; i < indice; i++) {
+      createTexture(i,listeTexture[i]);
+    }
+  }
+
+function createTexture(i,src){
+    textures[i] = gl.createTexture();
+    textures[i].image = new Image();
+    textures[i].image.onload = function()
+    {
+        handleLoadedTexture(textures[i])
+    }
+    textures[i].image.src = src;
+}
+	/*function initTexture()
 	{
     var indice = listeTexture.length;
     for (var i=0; i < indice; i++) {
@@ -221,17 +248,16 @@
       texture.image.src=listeTexture[i];
       textures.push(texture);
     }
-  }
+  }*/
 
 	function handleLoadedTexture(texture)
 	{
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+    gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
 	}
 
@@ -266,16 +292,19 @@
 		mat4.translate(mvMatrix, [camX, 0.0, camZ]);
 		mat4.translate(mvMatrix, [0, 0.0, -10.0]);
 
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, textures[2]);
-		gl.uniform1i(shaderProgram.samplerUniform, 0);
+    var indice = listeTexture.length;
+    for (var i=0; i < indice; i++) {
+  		gl.activeTexture('gl.TEXTURE'.concat(i));
+  		gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+  		gl.uniform1i(shaderProgram.samplerUniform, 0);
+    }
 
 		rootObject.draw();
     }
 
 	function initWorldObjects()
 	{
-		soleil = new sphere(null,null,0);
+		soleil = new sphere(null,textures[0],3);
 		objects.push(soleil);
 		soleil.translate([0,0,-2]);
 
@@ -307,19 +336,19 @@
     soleil_neptune.rotate(0.05,[0,0,1]);
 
     //Objet mercure
-    var mercure = new sphere(soleil_mercure, null, 250);
+    var mercure = new sphere(soleil_mercure, textures[1], 250);
     objects.push(mercure);
     mercure.translate([3,0,0]);
     mercure.scale([0.05,0.05,0.05]);
 
     //Objet venus
-    var venus = new sphere(soleil_venus,null,150);
+    var venus = new sphere(soleil_venus,textures[2],150);
     objects.push(venus);
     venus.translate([5,0,0]);
     venus.scale([0.15,0.15,0.15]);
 
     //Objet terre
-		var terre = new sphere(soleil_terre,null,120);
+		var terre = new sphere(soleil_terre,textures[3],120);
     objects.push(terre);
     terre.translate([7,0,0]);
     terre.rotate(0.3,[0,0,1]);
@@ -331,25 +360,25 @@
     terre_lune.scale([0.169,0.169,0.169]);
 
     //Objet lune
-    var lune = new sphere(terre_lune,null,0);
+    var lune = new sphere(terre_lune,textures[9],0);
     objects.push(lune);
     lune.translate([2,0,0]);
     lune.scale([0.2,0.2,0.2]);
 
     //Objet mars
-    var mars = new sphere(soleil_mars,null,100);
+    var mars = new sphere(soleil_mars,textures[4],100);
     objects.push(mars);
     mars.translate([9,0,0]);
     mars.scale([0.1,0.1,0.1]);
 
     //Objet Jupiter
-    var jupiter = new sphere(soleil_jupiter, null,50);
+    var jupiter = new sphere(soleil_jupiter, textures[5],50);
     objects.push(jupiter);
     jupiter.translate([15,0,0]);
     jupiter.scale([0.9,0.9,0.9]);
 
     //Objet saturne
-    var saturne = new sphere(soleil_saturne,null,25);
+    var saturne = new sphere(soleil_saturne,textures[6],25);
     objects.push(saturne);
     saturne.translate([20,0,0]);
     saturne.rotate(-0.5,[0,0,1]);
@@ -357,7 +386,7 @@
     saturne.scale([0.8,0.8,0.8]);
 
     //Objet uranus
-    var uranus = new sphere(soleil_uranus,null,25);
+    var uranus = new sphere(soleil_uranus,textures[7],25);
     objects.push(uranus);
     uranus.translate([25,0,0]);
     uranus.rotate(1,[0,0,1]);
@@ -365,7 +394,7 @@
     uranus.scale([0.6,0.6,0.6]);
 
     //Objet neptune
-    var neptune = new sphere(soleil_neptune,null,40);
+    var neptune = new sphere(soleil_neptune,textures[8],40);
     objects.push(neptune);
     neptune.translate([30,0,0]);
     neptune.scale([0.5,0.5,0.5]);
@@ -528,8 +557,6 @@
 
 
 <body onload="webGLStart();">
-    <a href="http://learningwebgl.com/">&lt;&lt; Tutorial</a><br>
-
 	<table border="0" width="100%">
 
 		<tr><td style="width:500px">
@@ -560,9 +587,4 @@
 		</tr>
 
 </table>
-    <br>
-    <a href="http://learningwebgl.com/">&lt;&lt; Tutorial</a><br>
-
-
-
 </body></html>
