@@ -95,6 +95,7 @@
 	//world
 	var objects = [];
 	var rootObject;
+  var stars;
 
 	//geometry
 	var pasLat = 3;
@@ -235,20 +236,6 @@ function createTexture(i,src){
     }
     textures[i].image.src = src;
 }
-	/*function initTexture()
-	{
-    var indice = listeTexture.length;
-    for (var i=0; i < indice; i++) {
-      var texture = gl.createTexture();
-      texture.image = new Image();
-      texture.image.onload = function()
-      {
-        handleLoadedTexture(texture);
-      }
-      texture.image.src=listeTexture[i];
-      textures.push(texture);
-    }
-  }*/
 
 	function handleLoadedTexture(texture)
 	{
@@ -291,6 +278,8 @@ function createTexture(i,src){
 
 		mat4.translate(mvMatrix, [camX, 0.0, camZ]);
 		mat4.translate(mvMatrix, [0, 0.0, -10.0]);
+    //stars.translate(mvMatrix,[camX,0.0,camZ]);
+		//stars.translate(mvMatrix, [0, 0.0, -10.0]);
 
     var indice = listeTexture.length;
     for (var i=0; i < indice; i++) {
@@ -304,9 +293,13 @@ function createTexture(i,src){
 
 	function initWorldObjects()
 	{
+
 		soleil = new sphere(null,textures[0],3);
 		objects.push(soleil);
 		soleil.translate([0,0,-2]);
+
+    stars = new sphere(soleil, textures[10],-3);
+    stars.scale([50,50,50]);
 
     //Pour permettre la modification de la vitesse de revolution des planetes
     //mercure
@@ -384,6 +377,10 @@ function createTexture(i,src){
     saturne.rotate(-0.5,[0,0,1]);
     saturne.rotate(0.1,[1,0,0]);
     saturne.scale([0.8,0.8,0.8]);
+
+    /*var anneaux_saturne = new sphere(saturne, textures[11],-25);
+    objects.push(anneaux_saturne);
+    anneaux_saturne.scale([2,0,2]);*/
 
     //Objet uranus
     var uranus = new sphere(soleil_uranus,textures[7],25);
