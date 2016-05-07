@@ -14,28 +14,50 @@
     precision mediump float;
 
 	varying vec2 vTextureCoord;
+    varying vec3 vLightWeighting;
 
 	uniform sampler2D uSampler;
 
     void main(void)
 	{
-		gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+		gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
     }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
     attribute vec3 aVertexPosition;
 	attribute vec2 aTextureCoord;
+    attribute vec3 aVertexNormal;
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
+    uniform mat3 uNMatrix;
+
+    uniform vec3 uAmbientColor;
+
+    uniform vec3 uPointLightingLocation;
+    uniform vec3 uPointLightingColor;
+
 
 	varying vec2 vTextureCoord;
+    varying vec3 vLightWeighting;
 
     void main(void)
 	{
+        vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 		vTextureCoord = aTextureCoord;
+
+
+            vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
+
+            vec3 transformedNormal = uNMatrix * aVertexNormal;
+
+            float directionalLightWeighting = max(dot(transformedNormal, lightDirection), 0.0);
+
+            vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+        
     }
 </script>
 
@@ -52,21 +74,23 @@
 	//textures
 	//var texture0;
 	//var texture1;
-  var textures = new Array();
-  var listeTexture = new Array();
-  listeTexture.push('./img/sun.jpg');
-  listeTexture.push('./img/mercure.jpg');
-  listeTexture.push('./img/venus.jpg');
-  listeTexture.push('./img/earth.jpg');
-  listeTexture.push('./img/mars.jpg');
-  listeTexture.push('./img/jupiter.jpg');
-  listeTexture.push('./img/saturn.png');
-  listeTexture.push('./img/uranus.jpg');
-  listeTexture.push('./img/neptune.jpg');
-  listeTexture.push('./img/moon.gif');
-  listeTexture.push('./img/stars.jpg');
-  listeTexture.push('./img/anneaux.jpg');
-  listeTexture.push('./img/asteroid.jpg');
+    var textures = new Array();
+    var listeTexture = new Array();
+    listeTexture.push('./img/sun.jpg');
+    listeTexture.push('./img/mercure.jpg');
+    listeTexture.push('./img/venus.jpg');
+    listeTexture.push('./img/earth.jpg');
+    listeTexture.push('./img/mars.jpg');
+    listeTexture.push('./img/jupiter.jpg');
+    listeTexture.push('./img/saturn.png');
+    listeTexture.push('./img/uranus.jpg');
+    listeTexture.push('./img/neptune.jpg');
+    listeTexture.push('./img/moon.gif');
+    listeTexture.push('./img/stars.jpg');
+    listeTexture.push('./img/anneaux.jpg');
+    listeTexture.push('./img/asteroid.jpg');
+
+    var z=-11;
 
 	//interaction
 	var drawStyle;
@@ -95,7 +119,7 @@
 	//world
 	var objects = [];
 	var rootObject;
-  var stars;
+	var stars;
 
 	//geometry
 	var pasLat = 3;
@@ -190,9 +214,18 @@
 		shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
         gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
+        shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
+        gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
         shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+        shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
+        shaderProgram.pointLightingLocationUniform = gl.getUniformLocation(shaderProgram, "uPointLightingLocation");
+        shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingColor");
+
+
     }
 
 	function mvPushMatrix()
@@ -215,6 +248,11 @@
 	{
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+
+        var normalMatrix = mat3.create();
+        mat4.toInverseMat3(mvMatrix, normalMatrix);
+        mat3.transpose(normalMatrix);
+        gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);        
     }
 
 
@@ -236,6 +274,20 @@ function createTexture(i,src){
     }
     textures[i].image.src = src;
 }
+	/*function initTexture()
+	{
+    var indice = listeTexture.length;
+    for (var i=0; i < indice; i++) {
+      var texture = gl.createTexture();
+      texture.image = new Image();
+      texture.image.onload = function()
+      {
+        handleLoadedTexture(texture);
+      }
+      texture.image.src=listeTexture[i];
+      textures.push(texture);
+    }
+  }*/
 
 	function handleLoadedTexture(texture)
 	{
@@ -268,40 +320,48 @@ function createTexture(i,src){
 
     function drawScene()
 	{
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-    mat4.identity(mvMatrix);
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
+        
+       
+        mat4.identity(mvMatrix);
+        
+        gl.uniform3f(shaderProgram.ambientColorUniform, 0.2,0.2,0.2);
+
+        gl.uniform3f(shaderProgram.pointLightingLocationUniform,0,0,z);
+
+        gl.uniform3f(shaderProgram.pointLightingColorUniform,0.4,0.4,0.4);
+        
 		mat4.rotate(mvMatrix, -camHeight, [1, 0, 0]);
-
 		mat4.translate(mvMatrix, [camX, 0.0, camZ]);
 		mat4.translate(mvMatrix, [0, 0.0, -10.0]);
-    //stars.translate(mvMatrix,[camX,0.0,camZ]);
-		//stars.translate(mvMatrix, [0, 0.0, -10.0]);
+        
+        var indice = listeTexture.length;
+        for (var i=1; i <= indice; i++) {
+            gl.activeTexture('gl.TEXTURE'.concat(i));
+            gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+            gl.uniform1i(shaderProgram.samplerUniform, 0);
+        }
 
-    var indice = listeTexture.length;
-    for (var i=0; i < indice; i++) {
-  		gl.activeTexture('gl.TEXTURE'.concat(i));
-  		gl.bindTexture(gl.TEXTURE_2D, textures[i]);
-  		gl.uniform1i(shaderProgram.samplerUniform, 0);
-    }
 
 		rootObject.draw();
     }
 
 	function initWorldObjects()
 	{
-
 		soleil = new sphere(null,textures[0],3);
 		objects.push(soleil);
 		soleil.translate([0,0,-2]);
+        soleil.scale([0.5,0.5,0.5]);
 
-    stars = new sphere(soleil, textures[10],-3);
-    stars.scale([50,50,50]);
 
-    //Pour permettre la modification de la vitesse de revolution des planetes
+	    stars = new sphere(soleil, textures[10],-3);
+	    stars.scale([50,50,50]);
+
+        //Pour permettre la modification de la vitesse de revolution des planetes
     //mercure
     soleil_mercure = new sphere(soleil,null,100);
     soleil_mercure.scale([0.99,0.99,0.99]);
@@ -502,9 +562,11 @@ function createTexture(i,src){
 					break;
 			case 38: //down
 					camZ++;
+                    z++;
 					break;
 			case 40: //forward
 					camZ--;
+                    z--;
 					break;
 			case 33: //pageUp
 					camHeight+=degToRad(1);
@@ -557,7 +619,7 @@ function createTexture(i,src){
 	<table border="0" width="100%">
 
 		<tr><td style="width:500px">
-			<canvas id="lesson03-canvas" style="border: none;" width="500" height="500"></canvas>
+			<canvas id="lesson03-canvas" style="border: none;" width="1000" height="500"></canvas>
 			</td>
 			<td>
 			<input type="range" min="0" max="100" value="100" step="1" oninput="handleSlider1(this.value)"/>

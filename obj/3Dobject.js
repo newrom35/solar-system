@@ -8,7 +8,9 @@ function worldObject(parent,texture,rotation)
 	this.vertexTextureCoordBuffer = null;
 	this.vertexIndexBuffer = null;
 	this.toggled = true;
-	// il faudra sans doute ajouter des choses ici pour gérer les nomales
+	//ajoutée pour les normales
+	this.vertexNormalBuffer = null;
+
 	if(typeof texture == 'undefined' || texture == null)
 	{
 		this.texture=null;
@@ -61,6 +63,7 @@ worldObject.prototype.draw = function()
 		}
 
 		mvPushMatrix();
+
 		mat4.multiply(mvMatrix, this.localTransformation);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexPositionBuffer);
@@ -69,7 +72,9 @@ worldObject.prototype.draw = function()
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexTextureCoordBuffer);
 		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, this.vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		// il faudra sans doute ajouter des choses ici pour gérer les nomales
+		// rajoutée pour les normales
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexNormalBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, this.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 		setMatrixUniforms();
 		if(this.vertexIndexBuffer == null)
@@ -81,6 +86,8 @@ worldObject.prototype.draw = function()
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.vertexIndexBuffer);
 			gl.drawElements(drawStyle, this.vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		}
+
+
 
 		//draws children
 		for(var i =0; i< this.children.length; i++)
